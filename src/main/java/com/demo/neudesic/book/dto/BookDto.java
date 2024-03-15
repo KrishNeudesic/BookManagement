@@ -16,4 +16,15 @@ public class BookDto {
 	private String genre;
 	private LocalDate publicationYear;
 
+	public BookDto(Long id, String name, String author, String genre, LocalDate publicationYear) {
+		this.id = id;
+		this.name = name;
+		this.author = author;
+		this.genre = genre;
+		this.publicationYear = publicationYear;
+	}
+
+	public BookDto() {
+	}
+
 }

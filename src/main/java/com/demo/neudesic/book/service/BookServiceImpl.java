@@ -11,7 +11,7 @@ import com.demo.neudesic.book.repository.BookRepository;
 
 @Service
 public class BookServiceImpl implements BookService {
-	
+
 	private final BookRepository bookRepository;
 
 	@Autowired
@@ -36,7 +36,22 @@ public class BookServiceImpl implements BookService {
 
 	@Override
 	public void delete(Book book) {
-	 bookRepository.delete(book);
+		bookRepository.delete(book);
+	}
+
+	@Override
+	public Optional<Book> findByName(String name) {
+		return bookRepository.findByName(name);
+	}
+
+	@Override
+	public List<Book> findByAuthor(String author) {
+		return bookRepository.findByAuthor(author).stream().filter(Optional::isPresent).map(Optional::get).toList();
+	}
+
+	@Override
+	public List<Book> findByGenre(String genre) {
+		return bookRepository.findByGenre(genre).stream().filter(Optional::isPresent).map(Optional::get).toList();
 	}
 
 }

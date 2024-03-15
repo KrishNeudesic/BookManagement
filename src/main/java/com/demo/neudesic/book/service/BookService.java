@@ -12,6 +12,12 @@ public interface BookService {
 	public List<Book> findAll();
 
 	public Optional<Book> findById(Long id);
+	
+	public Optional<Book> findByName(String name);
+	
+	public List<Book> findByAuthor(String author);
+	
+	public List<Book> findByGenre(String genre);
 
 	public void delete(Book book);
 
