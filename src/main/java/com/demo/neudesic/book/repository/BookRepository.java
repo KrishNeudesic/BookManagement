@@ -1,4 +1,4 @@
- package com.demo.neudesic.book.repository;
+package com.demo.neudesic.book.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -14,11 +14,11 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 	public List<Book> findAll();
 
 	public Optional<Book> findById(Long id);
-	
+
 	public Optional<Book> findByName(String name);
-	
+
 	public List<Optional<Book>> findByAuthor(String author);
-	
+
 	public List<Optional<Book>> findByGenre(String genre);
 
 	public void delete(Book book);

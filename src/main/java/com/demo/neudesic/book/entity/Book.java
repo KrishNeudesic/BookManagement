@@ -31,5 +31,7 @@ public class Book {
 	private String genre;
 
 	private LocalDate publicationYear;
+	
+	private Boolean isBooked = false;
 
 }

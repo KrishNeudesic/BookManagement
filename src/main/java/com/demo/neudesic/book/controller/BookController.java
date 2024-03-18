@@ -1,5 +1,8 @@
 package com.demo.neudesic.book.controller;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,10 +23,7 @@ import com.demo.neudesic.book.service.BookService;
 import com.demo.neudesic.book.util.CustomHttpResponse;
 import com.demo.neudesic.book.util.DTOConverter;
 
-import org.springframework.web.bind.annotation.RequestBody;
-
-import java.util.List;
-import java.util.Optional;
+import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("/book")
@@ -36,6 +37,7 @@ public class BookController {
 	private static final String EXCEPTION_MSG = "Exception caught ";
 	private static final String BOOK_NOT_FOUND = "Book not found!";
 	private static final String EXCEPTION = "EXCEPTION";
+	private static final String BOOK_RESERVED = "BOOK RESERVED!";
 
 	@Autowired
 	public BookController(BookService bookService) {
@@ -141,8 +143,8 @@ public class BookController {
 
 	@GetMapping("/find/genre")
 	public ResponseEntity<?> findBookByGenre(@RequestParam(name = "genre") String genre) {
-		List<Book> book = bookService.findByGenre(genre);
 		try {
+			List<Book> book = bookService.findByGenre(genre);
 			if (book.isEmpty()) {
 				logger.warn(BOOK_NOT_FOUND);
 				return ResponseEntity.status(HttpStatus.OK)
@@ -151,6 +153,33 @@ public class BookController {
 			String message = String.format("Fetching book by genre: %s", genre);
 			logger.info(message);
 			return ResponseEntity.status(HttpStatus.OK).body(new CustomHttpResponse(SUCCESS, HttpStatus.OK, book));
+		} catch (Exception e) {
+			logger.error(EXCEPTION_MSG, e);
+			e.printStackTrace();
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(new CustomHttpResponse(EXCEPTION, HttpStatus.INTERNAL_SERVER_ERROR, null));
+		}
+	}
+
+	// To be updated to tag to respective user id
+	@Transactional
+	@PostMapping("/reserve")
+	public ResponseEntity<?> reserveBook(@RequestBody BookDto book) {
+		try {
+			Optional<Book> bookPresent = bookService.findById(book.getId());
+			if (bookPresent.isEmpty()) {
+				logger.warn(BOOK_NOT_FOUND);
+				return ResponseEntity.status(HttpStatus.OK)
+						.body(new CustomHttpResponse(NOT_FOUND, HttpStatus.OK, null));
+			}
+			if (Boolean.TRUE.equals(bookPresent.get().getIsBooked())) {
+				return ResponseEntity.status(HttpStatus.OK)
+						.body(new CustomHttpResponse("Book Already Booked!", HttpStatus.OK, null));
+			}
+			bookPresent.get().setIsBooked(true);
+			bookService.save(bookPresent.get());
+			return ResponseEntity.status(HttpStatus.OK)
+					.body(new CustomHttpResponse(BOOK_RESERVED, HttpStatus.OK, bookPresent.get()));
 		} catch (Exception e) {
 			logger.error(EXCEPTION_MSG, e);
 			e.printStackTrace();
